@@ -1,0 +1,46 @@
+.chart-tooltip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 5px;
+  min-width: 126px;
+  padding: 10px 12px;
+  border: 1px solid #e2b600;
+  border-radius: 7px;
+  background: #171717;
+  box-shadow: 0 5px 16px #0003;
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.chart-tooltip strong {
+  color: #f0cf39;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-tooltip span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chart-crosshair {
+  stroke: #8d7300;
+  stroke-dasharray: 4 4;
+  stroke-width: 1.2;
+  pointer-events: none;
+}
+
+.chart-active-point {
+  fill: #e2b600;
+  stroke: #171717;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+#chart:focus-visible {
+  outline: 3px solid #e2b600;
+  outline-offset: 3px;
+  border-radius: 3px;
+}

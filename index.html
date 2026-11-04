@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Faça simulações financeiras, trabalhistas e do dia a dia com resultados visuais e fáceis de entender.">
+  <title>Investir Claro · Calculadoras e simuladores</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/pearl-background.css">
+  <link rel="stylesheet" href="css/chart-tooltip.css">
+  <link rel="stylesheet" href="css/calculators.css">
+  <link rel="stylesheet" href="css/market-ticker.css">
+  <link rel="stylesheet" href="css/portfolio.css">
+  <script src="js/api.js" defer></script>
+  <script src="js/chart.js" defer></script>
+  <script src="js/stocks.js" defer></script>
+  <script src="js/market-ticker.js" defer></script>
+  <script src="js/portfolio.js" defer></script>
+  <script src="js/calculators.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="header wrap"><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">↗</span> investir<span>claro</span></a><span class="header-note">Simulações para decisões mais conscientes</span><span class="mvp">CALCULADORAS</span></header>
+  <nav class="market-strip" aria-label="Categorias">
+    <div class="market-strip-inner"><a href="#catalog-popular">Mais acessadas</a><span>◆</span><a href="#catalog-financial">Financeiras</a><span>◆</span><a href="#catalog-labor">Trabalhistas</a><span>◆</span><a href="#catalog-utility">Utilitárias</a><span>◆</span><a href="#portfolio" id="portfolio-nav">Minha carteira</a></div>
+  </nav>
+  <section class="market-ticker" aria-label="Cotações de ações da B3">
+    <div class="market-ticker-heading"><span class="market-live-dot" aria-hidden="true"></span><strong>Mercado brasileiro</strong><span id="ticker-updated">Carregando cotações · brapi.dev</span></div>
+    <div class="market-ticker-controls">
+      <button class="ticker-arrow" id="ticker-previous" type="button" aria-label="Ver ativos anteriores">‹</button>
+      <div class="market-ticker-viewport" id="ticker-viewport" tabindex="0" aria-label="Carrossel de ativos da B3"><div class="market-ticker-track" id="ticker-track"></div></div>
+      <button class="ticker-arrow" id="ticker-next" type="button" aria-label="Ver próximos ativos">›</button>
+      <button class="ticker-arrow ticker-play-toggle" id="ticker-toggle" type="button" aria-label="Pausar movimento do carrossel" aria-pressed="false">Ⅱ</button>
+    </div>
+  </section>
+  <main class="wrap">
+    <div class="intro"><span class="eyebrow">FINANÇAS, TRABALHO E PLANEJAMENTO</span><h1>CALCULADORAS E SIMULADORES</h1><p>Explore ferramentas para planejar seu futuro financeiro com mais clareza.</p><label class="catalog-search"><span aria-hidden="true">⌕</span><input id="calculator-search" type="search" placeholder="Buscar calculadora por nome ou função..." aria-label="Buscar calculadora por nome ou função"></label><p class="search-status" id="search-status" aria-live="polite"></p></div>
+    <section class="portfolio-view" id="portfolio-view" hidden aria-labelledby="portfolio-title">
+      <div class="portfolio-heading">
+        <div><span class="eyebrow">CARTEIRA DE INVESTIMENTOS</span><h1 id="portfolio-title">Minha carteira</h1><p>Adicione ações, informe sua quantidade e preço médio de compra para estimar o resultado.</p></div>
+        <button id="refresh-portfolio" class="portfolio-refresh" type="button">Atualizar cotações</button>
+      </div>
+      <p class="portfolio-notice" id="portfolio-notice" role="status" aria-live="polite">Buscando cotações atuais da B3…</p>
+      <form class="portfolio-add" id="portfolio-form">
+        <div class="portfolio-search-wrap">
+          <label for="stock-search">Buscar ação</label>
+          <input id="stock-search" type="search" placeholder="Ex.: PETR4 ou Petrobras" autocomplete="off" required>
+          <div class="stock-search-results" id="stock-search-results" role="listbox" aria-label="Resultados da busca" hidden></div>
+        </div>
+        <div class="portfolio-selected" id="portfolio-selected" aria-live="polite">Nenhuma ação selecionada</div>
+        <label class="portfolio-input"><span>Quantidade de ações</span><input id="stock-quantity" type="number" min="0.000001" step="any" value="1" required></label>
+        <label class="portfolio-input"><span>Preço médio de compra</span><input id="stock-average" type="number" min="0.01" step="0.01" placeholder="R$ 0,00" required></label>
+        <button class="portfolio-add-button" id="add-stock" type="submit" disabled>Adicionar à carteira</button>
+      </form>
+      <p class="portfolio-data-note">Ações da B3 · preço de fechamento mais recente disponível na fonte. Resultado acumulado comparado ao preço médio informado, antes de taxas e impostos.</p>
+      <section class="portfolio-dashboard" aria-label="Resumo da carteira">
+        <div class="portfolio-kpis">
+          <article class="portfolio-kpi"><span>Valor atual</span><strong id="portfolio-value">R$ 0,00</strong></article>
+          <article class="portfolio-kpi"><span>Valor investido</span><strong id="portfolio-invested">R$ 0,00</strong></article>
+          <article class="portfolio-kpi"><span>Lucro / prejuízo total</span><strong id="portfolio-pnl">R$ 0,00</strong></article>
+          <article class="portfolio-kpi"><span>Variação da carteira no dia</span><strong id="portfolio-daily">0,00%</strong></article>
+        </div>
+        <article class="portfolio-chart-card">
+          <div class="portfolio-chart-heading"><div><h2>Resultado por ativo</h2><p>Lucro ou prejuízo estimado sobre seu preço médio</p></div><span>VISÃO DA CARTEIRA</span></div>
+          <div id="portfolio-chart-empty" class="portfolio-chart-empty">Adicione ações à carteira para visualizar o gráfico.</div>
+          <svg id="portfolio-chart" class="portfolio-chart" role="img" aria-label="Gráfico de lucro e prejuízo por ação"></svg>
+        </article>
+      </section>
+      <section class="portfolio-holdings" aria-labelledby="holdings-title">
+        <div class="holdings-heading"><div><h2 id="holdings-title">Seus ativos</h2><p id="holdings-count">Nenhuma ação adicionada</p></div></div>
+        <div class="holdings-table-wrap"><table class="holdings-table"><thead><tr><th>Ação</th><th>Quantidade</th><th>Preço médio</th><th>Preço atual</th><th>Valor atual</th><th>Lucro / prejuízo</th><th></th></tr></thead><tbody id="holdings-rows"></tbody></table></div>
+      </section>
+    </section>
+    <section class="calculator-hub" id="calculators" aria-labelledby="calculators-title">
+      <div class="calculator-heading" id="calculator-workspace-heading" hidden>
+        <button id="back-to-catalog" class="back-to-catalog" type="button">← Todas as calculadoras</button>
+        <div class="calculator-heading-copy"><span class="section-label"><span class="dot"></span> Ferramentas gratuitas</span><h2 id="calculators-title">Calculadoras e simuladores</h2><p>Cada ferramenta abre em sua própria aba. Selecione uma opção para começar.</p></div>
+      </div>
+      <div id="calculator-catalog" aria-live="polite"></div>
+      <div id="calculator-groups" aria-live="polite" hidden></div>
+      <p class="calculator-disclaimer">Resultados são estimativas educativas, não recomendação financeira, jurídica ou tributária. Revise as premissas e as regras vigentes antes de tomar decisões.</p>
+    </section>
+    <div class="converter-intro"><span class="eyebrow">MOEDAS DO MUNDO, SEM COMPLICAÇÃO</span><h2>Conversor de moedas</h2><p>Converta valores e acompanhe o histórico de câmbio.</p></div>
+    <section class="card" aria-label="Conversor e histórico de moedas" id="converter">
+      <div class="card-top"><span class="section-label"><span class="dot"></span> Conversor de moedas</span><span class="daily">Cotações diárias · Frankfurter</span></div>
+      <div id="notice" class="notice" role="status" aria-live="polite">Buscando as cotações…</div>
+      <div class="workspace">
+        <div class="conversion">
+          <p class="equals" id="base-label">1 Euro equivale a</p>
+          <h2 class="quote"><span id="rate-value">—</span><span id="quote-name">Real brasileiro</span></h2>
+          <p class="updated" id="updated">Aguardando a cotação mais recente</p>
+          <div class="fields">
+            <label class="field-title" for="amount-from">Você tem</label>
+            <div class="money-field"><input id="amount-from" type="number" min="0" step="any" value="1" aria-label="Valor na moeda de origem"><select id="currency-from" aria-label="Moeda de origem"></select></div>
+            <div class="swap-row"><button class="swap" id="swap" aria-label="Inverter moedas" title="Inverter moedas">⇅</button></div>
+            <label class="field-title" for="amount-to">Valor convertido</label>
+            <div class="money-field"><input id="amount-to" type="number" min="0" step="any" aria-label="Valor na moeda de destino"><select id="currency-to" aria-label="Moeda de destino"></select></div>
+            <p class="field-help">Edite qualquer valor para converter nos dois sentidos.</p>
+          </div>
+          <button class="refresh" id="refresh">Atualizar cotação <span aria-hidden="true">↻</span></button>
+        </div>
+        <div class="history">
+          <div class="chart-top"><div><h3 id="pair">EUR / BRL</h3><p id="change">Histórico da cotação</p></div><div class="periods" role="group" aria-label="Período do gráfico"><button data-days="5" aria-pressed="false">5 D</button><button data-days="30" aria-pressed="true" class="active">1 M</button><button data-days="180" aria-pressed="false">6 M</button><button data-days="365" aria-pressed="false">1 A</button><button data-days="1825" aria-pressed="false">5 A</button></div></div>
+          <div class="chart-container" id="chart-container"><svg id="chart" viewBox="0 0 600 280" role="img" aria-label="Histórico da cotação, aguardando dados" tabindex="0"></svg><div id="chart-tooltip" class="chart-tooltip" role="tooltip" hidden><strong id="chart-tooltip-date"></strong><span id="chart-tooltip-value"></span></div><p id="chart-empty" hidden>Histórico indisponível.</p></div>
+          <div class="stats"><div><span>Menor no período</span><strong id="minimum">—</strong></div><div><span>Maior no período</span><strong id="maximum">—</strong></div><div><span>Última cotação</span><strong id="last">—</strong></div></div>
+          <details><summary>Ver dados do gráfico</summary><div class="table-scroll"><table><caption id="table-caption">Cotação por dia</caption><thead><tr><th scope="col">Data</th><th scope="col">Cotação</th></tr></thead><tbody id="history-rows"></tbody></table></div></details>
+        </div>
+      </div>
+      <footer class="card-footer"><span>ⓘ Valores de referência, sem taxas ou impostos.</span><a href="https://frankfurter.dev/" target="_blank" rel="noopener noreferrer">Conheça a fonte dos dados ↗</a></footer>
+    </section>
+    <section class="explain" aria-label="Como funciona"><article><span class="step">01</span><h3>Escolha as moedas</h3><p>Selecione a moeda que você tem e aquela para a qual deseja converter.</p></article><article><span class="step">02</span><h3>Experimente um valor</h3><p>A conversão acompanha o que você digita. Use as setas para inverter o par.</p></article><article><span class="step">03</span><h3>Olhe para o histórico</h3><p>Compare períodos para entender a variação da cotação ao longo do tempo.</p></article></section>
+    <footer class="page-footer"><span>investir claro <span aria-hidden="true">✳</span></span><p>Feito para aprender. Simples para usar.</p><span>HTML · CSS · JavaScript</span></footer>
+  </main>
+</body>
+</html>
